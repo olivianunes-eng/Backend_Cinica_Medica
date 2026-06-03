@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senha     String
+  perfil    String   @default("RECEPCIONISTA")
+  criadoEm  DateTime @default(now())
+
+  consultas Consulta[]
+}
+
+model Paciente {
+  id             Int      @id @default(autoincrement())
+  nome           String
+  cpf            String   @unique
+  dataNascimento DateTime
+  telefone       String?
+  email          String?
+  endereco       String?
+  criadoEm       DateTime @default(now())
+
+  consultas Consulta[]
+}
+
+model Especialidade {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
+  descricao String?
+  criadoEm  DateTime @default(now())
+
+  medicos Medico[]
+}
+
+model Medico {
+  id              Int      @id @default(autoincrement())
+  nome            String
+  crm             String   @unique
+  telefone        String?
+  email           String?
+  valorConsulta   Decimal  @db.Decimal(10, 2)
+  criadoEm        DateTime @default(now())
+
+  especialidadeId Int
+  especialidade   Especialidade @relation(fields: [especialidadeId], references: [id])
+
+  consultas Consulta[]
+}
+
+model Consulta {
+  id           Int      @id @default(autoincrement())
+  dataConsulta DateTime
+  observacao   String?
+  status       String   @default("AGENDADA")
+  valor        Decimal  @db.Decimal(10, 2)
+  criadoEm     DateTime @default(now())
+
+  pacienteId Int
+  paciente   Paciente @relation(fields: [pacienteId], references: [id])
+
+  medicoId Int
+  medico   Medico @relation(fields: [medicoId], references: [id])
+
+  usuarioId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+}
